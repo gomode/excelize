@@ -324,7 +324,7 @@ func (f *File) getYAbs(sheet string, row int) int {
 	yAbs := 0
 	for rowID := row; rowID >= 1; rowID-- {
 		if yAbsByRow, ok := f.yAbsCache[rowID]; ok {
-			if f.yAbsInvalidRow > rowID {
+			if f.yAbsInvalidRow >= rowID {
 				yAbs += yAbsByRow
 				f.yAbsCache[row] = yAbs
 				f.yAbsInvalidRow = row + 1
