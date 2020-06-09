@@ -232,6 +232,7 @@ func (f *File) SetRowHeight(sheet string, row int, height float64) error {
 	rowIdx := row - 1
 	xlsx.SheetData.Row[rowIdx].Ht = height
 	xlsx.SheetData.Row[rowIdx].CustomHeight = true
+	f.yAbsInvalidRow = row
 	return nil
 }
 

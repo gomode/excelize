@@ -320,6 +320,26 @@ func flatCols(col xlsxCol, cols []xlsxCol, replacer func(fc, c xlsxCol) xlsxCol)
 	return fc
 }
 
+func (f *File) getYAbs(sheet string, row int) int {
+	yAbs := 0
+	for rowID := row; rowID >= 1; rowID-- {
+		if yAbsByRow, ok := f.yAbsCache[rowID]; ok {
+			if f.yAbsInvalidRow > rowID {
+				yAbs += yAbsByRow
+				f.yAbsCache[row] = yAbs
+				f.yAbsInvalidRow = row + 1
+				return yAbs
+			} else {
+				delete(f.yAbsCache, rowID)
+			}
+		}
+		yAbs += f.getRowHeight(sheet, rowID)
+	}
+	f.yAbsCache[row] = yAbs
+	f.yAbsInvalidRow = row + 1
+	return yAbs
+}
+
 // positionObjectPixels calculate the vertices that define the position of a
 // graphical object within the worksheet in pixels.
 //
@@ -374,19 +394,13 @@ func flatCols(col xlsxCol, cols []xlsxCol, replacer func(fc, c xlsxCol) xlsxCol)
 //
 func (f *File) positionObjectPixels(sheet string, col, row, x1, y1, width, height int) (int, int, int, int, int, int, int, int) {
 	xAbs := 0
-	yAbs := 0
+	yAbs := f.getYAbs(sheet, row)
 
 	// Calculate the absolute x offset of the top-left vertex.
 	for colID := 1; colID <= col; colID++ {
 		xAbs += f.getColWidth(sheet, colID)
 	}
 	xAbs += x1
-
-	// Calculate the absolute y offset of the top-left vertex.
-	// Store the column change to allow optimisations.
-	for rowID := 1; rowID <= row; rowID++ {
-		yAbs += f.getRowHeight(sheet, rowID)
-	}
 	yAbs += y1
 
 	// Adjust start column for offsets that are greater than the col width.
