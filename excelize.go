@@ -49,6 +49,8 @@ type File struct {
 	Relationships    map[string]*xlsxRelationships
 	XLSX             map[string][]byte
 	CharsetReader    charsetTranscoderFn
+	yAbsCache        map[int]int
+	yAbsInvalidRow   int
 }
 
 type charsetTranscoderFn func(charset string, input io.Reader) (rdr io.Reader, err error)
